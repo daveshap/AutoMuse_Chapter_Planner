@@ -4,6 +4,7 @@ import json
 import openai
 import tkinter as tk
 from time import time, sleep
+from threading import Thread
 from tkinter import ttk, scrolledtext
 
 
@@ -51,7 +52,7 @@ def send_message(event=None):
         return
 
     chat_text.config(state='normal')
-    chat_text.insert(tk.END, f"\n\n__________________________________\n\nUSER:\n\t{user_input}")
+    chat_text.insert(tk.END, f"\n\nUSER:\n{user_input}\n\n", 'user')
     chat_text.see(tk.END)
     chat_text.config(state='disabled')
 
@@ -63,19 +64,27 @@ def send_message(event=None):
         os.makedirs('chat_logs')
     save_file('chat_logs/%s' % filename, user_input)
 
+    ai_status.set("MUSE is thinking...")
+    Thread(target=get_ai_response).start()
+
+
+def get_ai_response():
     response = chatgpt_completion(conversation)
     conversation.append({'role': 'assistant', 'content': response})
 
     chat_text.config(state='normal')
-    chat_text.insert(tk.END, f"\n\n__________________________________\n\nMUSE:\n\t{response}")
+    chat_text.insert(tk.END, f"\n\nMUSE:\n{response}\n\n", 'muse')
     chat_text.see(tk.END)
     chat_text.config(state='disabled')
+    ai_status.set("")
+
 
 def on_return_key(event):
     if event.state & 0x1:  # Shift key is pressed
         user_entry.insert(tk.END, '\n')
     else:
         send_message()
+
 
 if __name__ == "__main__":
     openai.api_key = open_file('key_openai.txt')
@@ -97,8 +106,10 @@ if __name__ == "__main__":
     main_frame.columnconfigure(0, weight=1)
     main_frame.rowconfigure(0, weight=1)
 
-    chat_text = scrolledtext.ScrolledText(main_frame, wrap=tk.WORD, width=60, height=20)
-    chat_text.grid(column=0, row=0, columnspan=2, sticky=(tk.W, tk.E, tk.N, tk.S))
+    chat_text = tk.Text(main_frame, wrap=tk.WORD, width=60, height=20)
+    chat_text.grid(column=0, row=0, columnspan=3, sticky=(tk.W, tk.E, tk.N, tk.S))
+    chat_text.tag_configure('user', background='#D0F0C0', wrap='word')
+    chat_text.tag_configure('muse', background='#AED6F1', wrap='word')
     chat_text.insert(tk.END, "Welcome to AutoMuse!\n\n")
     chat_text.config(state='disabled')
 
@@ -108,6 +119,10 @@ if __name__ == "__main__":
 
     send_button = ttk.Button(main_frame, text="Send", command=send_message)
     send_button.grid(column=1, row=1, sticky=(tk.W, tk.E, tk.N, tk.S))
+
+    ai_status = tk.StringVar()
+    ai_status_label = ttk.Label(main_frame, textvariable=ai_status)
+    ai_status_label.grid(column=2, row=1, sticky=(tk.W, tk.E, tk.N, tk.S))
 
     user_entry.focus()
     root.bind("<Return>", on_return_key)
