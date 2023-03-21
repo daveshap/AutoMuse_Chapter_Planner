@@ -27,3 +27,10 @@ For the prose feedback, it will focus on the line level, providing some general 
 I created this based on my work with a professional editor. They provided a chapter-by-chapter report that was far more detailed than this model's output. A human editor, that you can have a conversation with, is still superior to GPT4, but maybe not for long. Especially as token windows get larger, and you can have a hypothetically unlimited conversation about your entire chapter (or novel!) editors may have a hard time keeping up. 
 
 With all that said, there are still elements of the human experience that the machine does not yet (and may never) grasp. For instance, the subjective feeling of resonance when you read something that connects emotionally, something that feels moving and emotionally true. These models are still expensive (relatively speaking), as I spent $8.02 reviewing the first 19 chapters of my novel. This is still far cheaper and faster than a human editor.
+
+# TKINTER Chat Interface
+
+To use this, you'll need to do the following:
+
+1. Populate `scratchpad.txt` with whatever you wish, up to 6000 tokens or so. You can copy the `summaries` into `scratchpad.txt`, which will then be used by the `SYSTEM` field of ChatGPT API, which means the model will be instantly aware of your story.
+2. To use the TKINTER chat interface, just use `chat_tkinter2.py`. This will open a small, simple window. Use `SHIFT+ENTER` for newlines in the chat window. It will also be color coded. Notice the "MUSE is thinking..." output in the bottom right while the API is generating a response.
