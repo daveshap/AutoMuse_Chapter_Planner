@@ -7,6 +7,9 @@ from time import time, sleep
 from tkinter import ttk, scrolledtext
 
 
+##### original chat functions by Dave
+
+
 def open_file(filepath):
     with open(filepath, 'r', encoding='utf-8', errors='ignore') as infile:
         return infile.read()
@@ -39,7 +42,10 @@ def chatgpt_completion(messages, model="gpt-4"):
             sleep(2 ** (retry - 1) * 5)
 
 
-def send_message(*args):
+####### TKINTER functions by GPT4
+
+
+def send_message(event=None):
     user_input = user_text.get()
     if not user_input.strip():
         return
@@ -65,6 +71,12 @@ def send_message(*args):
     chat_text.see(tk.END)
     chat_text.config(state='disabled')
 
+def on_return_key(event):
+    if event.state & 0x1:  # Shift key is pressed
+        user_entry.insert(tk.END, '\n')
+    else:
+        send_message()
+
 if __name__ == "__main__":
     openai.api_key = open_file('key_openai.txt')
     scratchpad = open_file('scratchpad.txt')
@@ -74,7 +86,7 @@ if __name__ == "__main__":
 
     # Tkinter GUI
     root = tk.Tk()
-    root.title("ChatGPT")
+    root.title("AutoMuse")
 
     main_frame = ttk.Frame(root, padding="10")
     main_frame.grid(column=0, row=0, sticky=(tk.W, tk.E, tk.N, tk.S))
@@ -82,9 +94,12 @@ if __name__ == "__main__":
     root.columnconfigure(0, weight=1)
     root.rowconfigure(0, weight=1)
 
+    main_frame.columnconfigure(0, weight=1)
+    main_frame.rowconfigure(0, weight=1)
+
     chat_text = scrolledtext.ScrolledText(main_frame, wrap=tk.WORD, width=60, height=20)
     chat_text.grid(column=0, row=0, columnspan=2, sticky=(tk.W, tk.E, tk.N, tk.S))
-    chat_text.insert(tk.END, "Welcome to ChatGPT!\n\n")
+    chat_text.insert(tk.END, "Welcome to AutoMuse!\n\n")
     chat_text.config(state='disabled')
 
     user_text = tk.StringVar()
@@ -95,6 +110,6 @@ if __name__ == "__main__":
     send_button.grid(column=1, row=1, sticky=(tk.W, tk.E, tk.N, tk.S))
 
     user_entry.focus()
-    root.bind("<Return>", send_message)
+    root.bind("<Return>", on_return_key)
 
     root.mainloop()
