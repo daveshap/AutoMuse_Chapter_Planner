@@ -19,12 +19,12 @@ def save_file(filepath, content):
         outfile.write(content)
 
 
-def chatgpt_completion(messages, model="gpt-4"):
+def chatgpt_completion(messages, temp=0, model="gpt-4"):
     max_retry = 7
     retry = 0
     while True:
         try:
-            response = openai.ChatCompletion.create(model=model, messages=messages)
+            response = openai.ChatCompletion.create(model=model, messages=messages, temperature=temp)
             text = response['choices'][0]['message']['content']
             filename = 'chat_%s_muse.txt' % time()
             if not os.path.exists('chat_logs'):
@@ -36,7 +36,7 @@ def chatgpt_completion(messages, model="gpt-4"):
             if retry >= max_retry:
                 print(f"Exiting due to an error in ChatGPT: {oops}")
                 exit(1)
-            print(f'Error communicating with OpenAI: {oops}. Retrying in {2 ** (retry - 1) * 5} seconds...')
+            print(f'Error communicating with OpenAI: "{oops}" - Retrying in {2 ** (retry - 1) * 5} seconds...')
             sleep(2 ** (retry - 1) * 5)
 
 

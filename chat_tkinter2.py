@@ -26,7 +26,6 @@ def chatgpt_completion(messages, model="gpt-4"):
     retry = 0
     while True:
         try:
-            
             response = openai.ChatCompletion.create(model=model, messages=messages)
             text = response['choices'][0]['message']['content']
             filename = 'chat_%s_muse.txt' % time()
