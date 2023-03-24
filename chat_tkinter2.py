@@ -8,7 +8,7 @@ from threading import Thread
 from tkinter import ttk, scrolledtext
 
 
-##### original chat functions by Dave
+##### simple helper functions
 
 
 def open_file(filepath):
@@ -19,6 +19,19 @@ def open_file(filepath):
 def save_file(filepath, content):
     with open(filepath, 'w', encoding='utf-8') as outfile:
         outfile.write(content)
+
+
+def load_json(filepath):
+    with open(filepath, 'r', encoding='utf-8') as infile:
+        return json.load(infile)
+
+
+def save_json(filepath, payload):
+    with open(filepath, 'w', encoding='utf-8') as outfile:
+        json.dump(payload, outfile, ensure_ascii=False, sort_keys=True, indent=2)
+
+
+##### OpenAI functions
 
 
 def chatgpt_completion(messages, model="gpt-4"):
@@ -41,15 +54,15 @@ def chatgpt_completion(messages, model="gpt-4"):
             if retry >= max_retry:
                 print(f"Exiting due to an error in ChatGPT: {oops}")
                 exit(1)
-            print(f'Error communicating with OpenAI: {oops}. Retrying in {2 ** (retry - 1) * 5} seconds...')
+            print(f'Error communicating with OpenAI: "{oops}" - Retrying in {2 ** (retry - 1) * 5} seconds...')
             sleep(2 ** (retry - 1) * 5)
 
 
-####### TKINTER functions by GPT4
+####### TKINTER functions 
 
 
 def send_message(event=None):
-    user_input = user_text.get()
+    user_input = user_entry.get("1.0", tk.END).strip()
     if not user_input.strip():
         return
 
@@ -58,7 +71,12 @@ def send_message(event=None):
     chat_text.see(tk.END)
     chat_text.config(state='disabled')
 
-    user_text.set("")
+    user_entry.delete("1.0", tk.END)  # Clear user_entry content
+
+    # Disable input and button while MUSE is thinking
+    user_entry.config(state='disabled')
+    send_button.config(state='disabled')
+
 
     conversation.append({'role': 'user', 'content': user_input})
     filename = 'chat_%s_user.txt' % time()
@@ -68,17 +86,28 @@ def send_message(event=None):
 
     ai_status.set("MUSE is thinking...")
     Thread(target=get_ai_response).start()
+    # Re-enable input and button after response
+    user_entry.config(state='normal')
+    send_button.config(state='normal')
 
 
 def get_ai_response():
     response = chatgpt_completion(conversation)
     conversation.append({'role': 'assistant', 'content': response})
+    # save debug
+    filename = 'debug/log_%s_main.json' % time()
+    save_json(filename, conversation)
 
-    chat_text.config(state='normal')
-    chat_text.insert(tk.END, f"\n\nMUSE:\n{response}\n\n", 'muse')
-    chat_text.see(tk.END)
-    chat_text.config(state='disabled')
-    ai_status.set("")
+    def update_chat_text():
+        chat_text.config(state='normal')
+        chat_text.insert(tk.END, f"\n\nMUSE:\n{response}\n\n", 'muse')
+        chat_text.see(tk.END)
+        chat_text.config(state='disabled')
+        ai_status.set("")
+
+    # Update the chat_text in the main thread
+    root.after(0, update_chat_text)
+
 
 
 def on_return_key(event):
@@ -91,7 +120,7 @@ def on_return_key(event):
 if __name__ == "__main__":
     openai.api_key = open_file('key_openai.txt')
     scratchpad = open_file('scratchpad.txt')
-    system_message = open_file('system_chapter_helper.txt').replace('<<INPUT>>', scratchpad)
+    system_message = open_file('default_system.txt').replace('<<INPUT>>', scratchpad)
     conversation = list()
     conversation.append({'role': 'system', 'content': system_message})
 
@@ -116,7 +145,8 @@ if __name__ == "__main__":
     chat_text.config(state='disabled')
 
     user_text = tk.StringVar()
-    user_entry = ttk.Entry(main_frame, width=50, textvariable=user_text)
+    # Replace the Entry widget with a Text widget
+    user_entry = tk.Text(main_frame, wrap=tk.WORD, width=50, height=3)
     user_entry.grid(column=0, row=1, sticky=(tk.W, tk.E, tk.N, tk.S))
 
     send_button = ttk.Button(main_frame, text="Send", command=send_message)
@@ -127,6 +157,9 @@ if __name__ == "__main__":
     ai_status_label.grid(column=2, row=1, sticky=(tk.W, tk.E, tk.N, tk.S))
 
     user_entry.focus()
+    # Update the event binding to use the new Text widget
     root.bind("<Return>", on_return_key)
+    # Update the event binding for the user_entry Text widget
+    #user_entry.bind("<Return>", on_return_key)
 
     root.mainloop()
