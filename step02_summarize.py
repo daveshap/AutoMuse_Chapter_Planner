@@ -52,7 +52,7 @@ if __name__ == "__main__":
         if file_name.endswith(".txt") and file_name not in os.listdir(summaries_dir):
             print('\n\nReading', file_name, '\n\n')
             chapter = open_file(os.path.join(chapters_dir, file_name))
-            prompt = open_file('prompt_summarize.txt').replace('<<INPUT>>', chapter)
+            prompt = open_file('prompt_summarize_02.txt').replace('<<INPUT>>', chapter)
             conversation = list()
             conversation.append({'role': 'system', 'content': '''I am a fiction writing assistant who will always provide thorough, professional, and detailed help.'''})
             conversation.append({'role': 'user', 'content': prompt})
