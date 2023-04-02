@@ -1,6 +1,6 @@
-# Chapter Summarizer GPT4
+# AutoMuse Chapter Planner
 
-Provides an executive summary, list of salient details, and some editorial writing feedback for any chapter up to about 6000 words or so. 
+Provides an executive summary, list of salient details, and some editorial writing feedback for any chapter up to about 6000 words or so. You can load numerous summaries into the `scratchpad.txt` file which then enables you to talk about your whole novel. 
 
 ## Get Started
 
