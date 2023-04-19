@@ -47,6 +47,7 @@ def chatgpt_completion(messages, model="gpt-4"):
             save_file('chat_logs/%s' % filename, text)
             return text
         except Exception as oops:
+            print('\n\n\n OPENAI ERROR:', str(oops), '\n\n\n')
             if 'maximum context length' in str(oops):
                 a = messages.pop(1)
                 continue

@@ -14,7 +14,7 @@ for filename in os.listdir(folder_path):
             file_contents.append(f.read())
 
 # Merge the contents of all files with a double newline between each chunk
-merged_contents = "\n\n".join(file_contents)
+merged_contents = "\n\n\n".join(file_contents)
 
 # Write the merged contents to a new file called "scratchpad.txt" as UTF-8, ignoring errors
 with open("scratchpad.txt", "w", encoding="utf-8", errors="ignore") as f:
